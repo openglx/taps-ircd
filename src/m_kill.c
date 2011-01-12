@@ -120,17 +120,22 @@ int m_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
   user = parv[1];
   path = parv[2]; /* Either defined or NULL (parc >= 2!!) */
 
-  if (!IsPrivileged(cptr))
+  if (!IsPrivileged(cptr) && !(IsVLinkOper(cptr) || IsVLinkAdmin(cptr) ))
     {
       sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
       return 0;
     }
 
-  if (MyClient(sptr) && IsAnOper(sptr) && !IsSetOperK(sptr))
-    {
+  if (MyClient(sptr)) {
+    if (IsAnOper(sptr) && !IsSetOperK(sptr)) {
       sendto_one(sptr,":%s NOTICE %s :You have no K flag",me.name,parv[0]);
       return 0;
     }
+    if (!(IsVLinkOper(cptr) || IsVLinkAdmin(cptr))) {
+      sendto_one(sptr,":%s NOTICE %s :You have no K flag",me.name,parv[0]);
+      return 0;
+    }
+  }
 
   if (IsAnOper(cptr))
     {
@@ -164,11 +169,28 @@ int m_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     return 0;
   }
   
-  if (!MyConnect(acptr) && IsLocOp(cptr))
-    {
+  /* 1 - don't allow a virtual oper war;
+   * 2 - virtual opers only kill users at their very own vlink;
+   * 3 - virtual admin can kill virtual opers */
+  if (IsVLinkAdmin(cptr) && 
+        (IsVLinkAdmin(acptr) ||
+         !AreUsersAtSameVLink(acptr->user, cptr->user))) {
       sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
       return 0;
     }
+   if (IsVLinkOper(cptr) && 
+        (IsVLinkOper(acptr) || IsVLinkAdmin(acptr) ||
+         !AreUsersAtSameVLink(acptr->user, cptr->user))) {
+      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
+      return 0;
+    }
+    /* 4 - local opers (not virtual) can only kill at their own server */
+  if (!MyConnect(acptr) && IsLocOp(cptr)) {
+      sendto_one(sptr, form_str(ERR_NOPRIVILEGES), me.name, parv[0]);
+      return 0;
+    }
+
+  /* other checks */
   if (IsServer(acptr) || IsMe(acptr))
     {
       sendto_one(sptr, form_str(ERR_CANTKILLSERVER),

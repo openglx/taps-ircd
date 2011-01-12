@@ -380,6 +380,9 @@ struct Client
 #define UMODE_HIDEOPER		0x04000000 /* hide oper status */
 #define UMODE_FLOODEX		0x08000000 /* flood exempt */
 
+#define UMODE_VLINK_OPER	0x10000000 /* vlink oper, also known as vcop */
+#define UMODE_VLINK_ADMIN	0x20000000 /* vlink admin, also known as vadmin */
+
 /* end of umodes */
 
 
@@ -438,11 +441,13 @@ struct Client
 					  UMODE_PRIVATE | UMODE_REGMSG | \
 					  UMODE_STEALTH | UMODE_SSL | UMODE_FLOODEX | UMODE_DEAF )
 #define INTERNAL_UMODES (UMODE_BOT | UMODE_IDENTIFIED | UMODE_STEALTH | \
-			UMODE_SADMIN | UMODE_SSL | UMODE_FLOODEX )
+			UMODE_SADMIN | UMODE_SSL | UMODE_FLOODEX | UMODE_VLINK_OPER | \
+			UMODE_VLINK_ADMIN )
 #define ALL_UMODES   (USER_UMODES | UMODE_LOCOP | UMODE_SPY | \
 			UMODE_OPER | UMODE_LOCOP | UMODE_SADMIN | \
 			 UMODE_ZOMBIE | UMODE_HELPER | UMODE_HIDEOPER | \
-			 UMODE_ADMIN | UMODE_TECHADMIN | UMODE_NETADMIN )
+			 UMODE_ADMIN | UMODE_TECHADMIN | UMODE_NETADMIN | \
+			UMODE_VLINK_OPER | UMODE_VLINK_ADMIN )
 
 #ifndef OPER_UMODES
 #define OPER_UMODES  (UMODE_OPER | UMODE_WALLOP | UMODE_SPY)
@@ -477,6 +482,7 @@ struct Client
 #define IsAdmin(x)		((x)->umodes & UMODE_ADMIN)
 #define IsNetAdmin(x)		((x)->umodes & UMODE_NETADMIN)
 #define IsTechAdmin(x)		((x)->umodes & UMODE_TECHADMIN)
+
 #define SetOper(x)              ((x)->umodes |= UMODE_OPER)
 #define SetLocOp(x)             ((x)->umodes |= UMODE_LOCOP)
 #define SetHelper(x)		((x)->umodes |= UMODE_HELPER)
@@ -484,6 +490,7 @@ struct Client
 #define SetAdmin(x)		((x)->umodes |= UMODE_ADMIN)
 #define SetNetAdmin(x)		((x)->umodes |= UMODE_NETADMIN)
 #define SetTechAdmin(x)		((x)->umodes |= UMODE_TECHADMIN)
+
 #define ClearOper(x)            ((x)->umodes &= ~UMODE_OPER)
 #define ClearLocOp(x)           ((x)->umodes &= ~UMODE_LOCOP)
 #define ClearHelper(x)		((x)->umodes &= ~UMODE_HELPER)
@@ -566,6 +573,18 @@ struct Client
 /* SSL */
 #define SetSecure(x)            ((x)->flags |= FLAGS_SSL)
 #define IsSecure(x)        	    ((x)->flags & FLAGS_SSL)
+
+/* VLink Oper - Admin is, actually, same thing */
+#define IsVLinkOper(x)		((x)->umodes & UMODE_VLINK_OPER)
+#define SetVLinkOper(x)		((x)->umodes |= UMODE_VLINK_OPER)
+#define ClearVLinkOper(x)	((x)->umodes &= ~UMODE_VLINK_OPER)
+#define IsVLinkAdmin(x)		((x)->umodes & UMODE_VLINK_ADMIN)
+#define SetVLinkAdmin(x)	((x)->umodes |= UMODE_VLINK_ADMIN)
+#define ClearVLinkAdmin(x)	((x)->umodes &= ~UMODE_VLINK_ADMIN)
+
+
+/* useful macro */
+#define AreUsersAtSameVLink(a,b)	(check_if_at_same_vlink(a, b))
 
 
 #ifdef REJECT_HOLD

@@ -74,7 +74,7 @@ char *infotext[] =
   "openglx             Felipe              openglx@StarByte.net",
   "",
   "TAPS - This Ain't PTlink Software - is based on PTlink Software.",
-  "Former Project Manager for PTlink Software, our beloved:"
+  "Former Project Manager for PTlink Software, our beloved:",
   "Lamego              Joao Pinto          Lamego@PTlink.net",
   "",
   "The following people have contributed to this release of PTlink",

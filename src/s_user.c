@@ -114,6 +114,8 @@ FLAG_ITEM user_modes[] =
   {UMODE_NODCC, 'v'},
   {UMODE_WALLOP, 'w'},
   {UMODE_SPY,'y'},
+  {UMODE_VLINK_OPER, 'x'},
+  {UMODE_VLINK_ADMIN, 'X'},
   {UMODE_ZOMBIE, 'z'},
   {0, 0}
 };
@@ -148,9 +150,9 @@ int user_modes_from_c_to_bitmask[] =
   UMODE_STEALTH,/* S */
   UMODE_TECHADMIN,/* T */
   0,            /* U */
-  0,            /* V */
+  0, /* V */ 
   0,            /* W */
-  0,            /* X */
+  UMODE_VLINK_ADMIN, /* X */
   0,            /* Y */
   0,            /* Z 0x5A */
   0, 0, 0, 0, 0, /* 0x5F */ 
@@ -178,7 +180,7 @@ int user_modes_from_c_to_bitmask[] =
   0,            /* u */
   UMODE_NODCC,  /* v */
   UMODE_WALLOP, /* w */
-  0, 		/* x */
+  UMODE_VLINK_OPER, /* x */
   UMODE_SPY,    /* y */
   UMODE_ZOMBIE, /* z 0x7A */
   0,0,0,0,0,     /* 0x7B - 0x7F */
@@ -1056,7 +1058,7 @@ static int register_user(aClient *cptr, aClient *sptr,
             }
          }
 #ifndef NO_DEFAULT_INVISIBLE
-      sptr->umodes |= UMODE_INVISIBLE;
+      SetInvisible(sptr);
 #endif
 
       sendto_ops_imodes(IMODE_CLIENTS,
@@ -1068,6 +1070,21 @@ static int register_user(aClient *cptr, aClient *sptr,
       if(IsInvisible(sptr))
         Count.invisi++;
 					 
+/*
+Could use something like this to send messages of connecting/exiting clients at each vlink,
+for different (global) channels. Problem is: sendto_channel requires a valid channel pointer,
+and I don't see myself doing it right now.
+
+It isn't THAT dificult, just have to make sure no user could stay lying there if services
+are down, for example. Anyway, needs a little more think before code.
+
+          if (sptr->user->vlink)
+    	  sendto_channel_butserv(lch_connects, &me,
+  		":%s PRIVMSG #Connects_%s :Client >> %s (%s@%s) {vlink}",
+						 mename, mename,
+						 nick, sptr->username, sptr->host);
+*/
+
   	  sendto_channel_butserv(lch_connects, &me,
   		":%s PRIVMSG &Connects :Client >> %s (%s@%s) [%s] {%d}",
 						 mename, 
@@ -2795,6 +2812,8 @@ int user_mode(aClient *cptr, aClient *sptr, int parc, char *parv[])
 		case 'h' :
 		case 'A' :
 		case 'a' :		/* */
+		case 'x' :	/* vlink oper */
+		case 'X' :	/* vlink admin */
 		  if (!IsServer(cptr) && (what == MODE_ADD))
 			break;
 
