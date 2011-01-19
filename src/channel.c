@@ -57,6 +57,7 @@
 #include "m_svsinfo.h"	/* my_svsinfo_ts */
 #include "s_conf.h"
 #include "dconf_vars.h"
+#include "svline.h"
 
 #include <assert.h>
 #include <string.h>
@@ -680,7 +681,8 @@ int     can_send(struct Client *cptr, struct Channel *chptr, char* msg)
 {
   Link  *lp;
   char *cp;
-
+  aConfItem* msgv;
+  char *stripedmsg;
 
   if ( MyClient(cptr) && IsStealth(cptr) )
       return (MODE_NOPRIVMSGS);
@@ -721,9 +723,15 @@ int     can_send(struct Client *cptr, struct Channel *chptr, char* msg)
 		
   if (chptr->mode.mode & MODE_NOSPAM) 
 	{  	  
+		/* act on svlines now -- openglx */
+		stripedmsg = strip_control_codes_lower(msg);
+		if (MyConnect(cptr) && !IsOper(cptr) && (msgv = is_msgvlined(stripedmsg)))
+			if (act_on_svline(cptr, stripedmsg, msgv))
+				return (MODE_NOSPAM);
+
 	  if (is_spam(msg))
 		return (MODE_NOSPAM);
-		
+
 	  cp = strchr(msg,'#');		
 		
 	  if(cp)

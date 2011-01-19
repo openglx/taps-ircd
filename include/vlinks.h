@@ -17,3 +17,4 @@ void send_all_vlinks(struct Client *acptr);
 void report_vlinks(struct Client *sptr);
 void dump_vlinks(char* dest, struct Client *sptr);
 void clear_vlinks();
+
