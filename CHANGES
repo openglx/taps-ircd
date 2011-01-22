@@ -2,15 +2,18 @@
 *                   http://taps.ircworld.nl/                     *
 ******************************************************************
 
-  TAPS6.21.0 (31 Jan 2011)
+  TAPS6.21.0 (Jan 2011)
 ==================================================================
 
   What is new ?
   ---------------------
-  Support for VLinks, VAdmins and VCops - requested by brazilian networks [Jan/2011]
+  [Issue 0000046] Create module to maintain vlink (virtual servers) database
+  [Issue 0000054] Antispam system for channels and privmsgs
+
 
   What has been fixed ?
   ---------------------
+  [Issue 0000047] IRCd crashes on x86_64 environment
 
   Minor editions ?
   ---------------------
@@ -20,3 +23,5 @@
   Merge TKlines code from Hybrid6.3
   Fix RestrictedChans 
 	(empty channels are not synchronized on netjoins)
+  Fix copyright information for TAPS Software
+
