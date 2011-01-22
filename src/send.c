@@ -1696,7 +1696,7 @@ vsendto_globops(const char *pattern, va_list real_args)
   char nbuf[1024];
   va_list args;
 
-  va_copy(args, real_real);
+  va_copy(args, real_args);
   
   for (cptr = oper_cptr_list; cptr; cptr = cptr->next_oper_client)
     {
