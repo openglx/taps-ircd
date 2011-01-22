@@ -1500,6 +1500,7 @@ vsendto_prefix_one(aClient *to, aClient *from,
           sendto_realops(
                      "Send message (%s) to %s[%s] dropped from %s(Fake Dir)",
                      sendbuf, to->name, to->from->name, from->name);
+	  va_end(args);
           return;
         }
 
@@ -1521,6 +1522,7 @@ vsendto_prefix_one(aClient *to, aClient *from,
                    me.name, from->name, to->name, to->username,
                    to->host, to->from);
       
+      va_end(args);
       return;
     } /* if (!MyClient(from) && IsPerson(to) && (to->from == from->from)) */
   
@@ -1584,6 +1586,8 @@ vsendto_prefix_one(aClient *to, aClient *from,
   Debug((DEBUG_SEND,"Sending [%s] to %s",sendbuf,to->name));
 
   send_message(to, sendbuf, len);
+
+  va_end(args);
 } /* vsendto_prefix_one() */
 
 /*
@@ -1611,11 +1615,14 @@ vsendto_realops()
 */
 
 static void
-vsendto_realops(const char *pattern, va_list args)
+vsendto_realops(const char *pattern, va_list real_args)
 
 {
   aClient *cptr;
   char nbuf[1024];
+  va_list args;
+
+  va_copy(args, real_args);
   
   for (cptr = oper_cptr_list; cptr; cptr = cptr->next_oper_client)
     {
@@ -1625,6 +1632,8 @@ vsendto_realops(const char *pattern, va_list args)
           
           vsendto_one(cptr, nbuf, args);
     }
+
+  va_end(args);
 } /* vsendto_realops() */
 
 /*
@@ -1680,11 +1689,14 @@ vsendto_globops()
 */
 
 static void
-vsendto_globops(const char *pattern, va_list args)
+vsendto_globops(const char *pattern, va_list real_args)
 
 {
   aClient *cptr;
   char nbuf[1024];
+  va_list args;
+
+  va_copy(args, real_real);
   
   for (cptr = oper_cptr_list; cptr; cptr = cptr->next_oper_client)
     {
@@ -1694,6 +1706,8 @@ vsendto_globops(const char *pattern, va_list args)
           
           vsendto_one(cptr, nbuf, args);
     }
+
+  va_end(args);
 } /* vsendto_globops() */
 
 
