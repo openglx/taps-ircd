@@ -71,8 +71,24 @@ int	m_svline(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
 
 	        aconf->next = svlines;
 		svlines = aconf;		
+
+		/* check if first word is ":gline:", ":kill:" or ":block" */
+		if (strstr(reason, ":gline: ") == reason) {
+			SetSVLineAction(aconf, GLINE_ON_MATCH);
+			reason += strlen(":gline: ");
+		}
+		else if (strstr(reason, ":kill: ") == reason) {
+			SetSVLineAction(aconf, KILL_ON_MATCH);
+			reason += strlen(":kill: ");
+		}
+		else if (strstr(reason, ":block: ") == reason) {
+			SetSVLineAction(aconf, BLOCK_ON_MATCH);
+			reason += strlen(":block: ");
+		}
         
-		DupString(aconf->passwd, reason);
+		if (reason && *reason != '\0')
+			DupString(aconf->passwd, reason);
+
                 sendto_serv_butone(cptr, ":%s SVLINE %s :%s",
 			  parv[0], parv[1], reason);			
 	  }
@@ -278,3 +294,88 @@ void clear_svlines(void)
 	svlines = NULL;
 	
   }
+
+/**
+ * \brief	Act on svline match (warn, block, gline)
+ * \param	user		aClient* of offending user
+ * \param	msg		char* of offense
+ * \param	svline		aConfItem* of matched svline
+ * \return	0 if no futher action is needed, 1 is should act (block msg)
+ */
+int act_on_svline(struct Client* sptr, char* msg, aConfItem* svline)
+{
+	char *mename = me.name;
+	aConfItem* aconf;
+	char* kill_parv[3];
+	
+	/* if not user, ignore */
+	if (! sptr->user)
+		return 0;
+
+	if (sptr->user->vlink)
+		mename = sptr->user->vlink->name;
+
+	/* warn user */
+	sendto_one(sptr, ":%s NOTICE %s :%s", mename, sptr->name, svline->passwd);
+
+	switch (svline->flags) {
+		case GLINE_ON_MATCH:
+		/* If GLineOnSVline is a number higher than 0 and an user
+		 * has triggered a SVline, add a temporary GLine (with time
+		 * being equal GLineOnSVline time) to *@(user host).
+		 *
+		 * Use wisely, as this can lead to big problems!
+		 * -- openglx
+		 */
+		if(GLineOnSVline > 0) {
+			aconf = make_conf();
+			aconf->status = CONF_KILL;
+
+			DupString(aconf->host, sptr->realhost);
+			DupString(aconf->passwd, "Auto GLined for triggering a SVline");
+			DupString(aconf->user, "*");
+			DupString(aconf->name, me.name);
+			aconf->hold = CurrentTime + GLineOnSVline;
+			add_gline(aconf);
+
+			sendto_serv_butone(NULL, ":%s GLINE %s@%s %lu %s :%s",
+				 me.name,
+				 aconf->user, aconf->host,
+				 aconf->hold - CurrentTime,
+				 aconf->name, aconf->passwd);
+	
+			apply_gline(aconf->host, aconf->user,
+				"Auto GLined for triggering a SVline");
+		}
+
+		sendto_ops_imodes(IMODE_VLINES,"GLined for %d seconds after svlined message"
+				" (from %s): %s", GLineOnSVline, sptr->name, msg);
+		return 1;
+		/******************/
+
+		case KILL_ON_MATCH:
+			kill_parv[0] = me.name;
+			kill_parv[1] = sptr->name;
+			kill_parv[2] = "SVLINE Killed after svline message";
+			m_kill(&me, &me, 3, kill_parv);
+			sendto_ops_imodes(IMODE_VLINES,"Killed after svlined message"
+				" (from %s): %s", sptr->name, msg);
+			return 1;
+		/******************/
+
+		case BLOCK_ON_MATCH:
+			sendto_ops_imodes(IMODE_VLINES,"Blocked svlined message"
+				" (from %s): %s", sptr->name, msg);
+			return 1;
+		/******************/
+
+		case WARN_ON_MATCH:
+		default:
+			sendto_ops_imodes(IMODE_VLINES,"Warning on svlined message"
+				" (from %s): %s", sptr->name, msg);
+			return 0;
+	}
+
+	return 0;
+}
+

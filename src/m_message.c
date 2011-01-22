@@ -157,42 +157,9 @@ static  int     m_message(struct Client *cptr,
       stripedmsg = strip_control_codes_lower(parv[2]);
       if(!IsOper(sptr) && (msgv = is_msgvlined(stripedmsg)))
       	{
-      	  sendto_one(sptr,":%s NOTICE %s :%s",
-      	    me.name, parv[0], msgv->passwd);
-          sendto_ops_imodes(IMODE_VLINES,"Blocked svlined message (from %s): %s",
-            sptr->name, parv[2]);
-
-	  /* If GLineOnSVline is a number higher than 0 and an user
-	   * has triggered a SVline, add a temporary GLine (with time
-	   * being equal GLineOnSVline time) to *@(user host). 
-	   *
-	   * Use wisely, as this can lead to big problems!
-	   * -- openglx
-	   */
-	  if(GLineOnSVline > 0)
-	  {
-                 aconf = make_conf();
-		 aconf->status = CONF_KILL;
-		 
-		 
-		 DupString(aconf->host, cptr->realhost);
-		 DupString(aconf->passwd, "Auto GLined for triggering a SVline");
-		 DupString(aconf->user, "*");
-		 DupString(aconf->name, me.name);
-		 aconf->hold = CurrentTime + GLineOnSVline;
-		 add_gline(aconf);
-		 
-                 sendto_serv_butone(NULL, ":%s GLINE %s@%s %lu %s :%s",
-                                 me.name,
-                                 aconf->user, aconf->host,
-                                 aconf->hold - CurrentTime,
-                                 aconf->name,
-                                 aconf->passwd);
-		 apply_gline(aconf->host, aconf->user, "Auto GLined for triggering a SVline");
-	  }
- 	  
-      	  return 0;
-      	}
+		if (act_on_svline(sptr, parv[2], msgv))
+			return 0;
+	}
 #ifdef ANTI_SPAMBOT
 #ifndef ANTI_SPAMBOT_WARN_ONLY
       /* if its a spambot, just ignore it */
