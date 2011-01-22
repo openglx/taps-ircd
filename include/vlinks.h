@@ -17,3 +17,5 @@ void send_all_vlinks(struct Client *acptr);
 void report_vlinks(struct Client *sptr);
 void dump_vlinks(char* dest, struct Client *sptr);
 void clear_vlinks();
+int check_if_at_same_vlink(struct User* user1, struct User* user2);
+

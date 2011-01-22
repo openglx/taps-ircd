@@ -27,7 +27,7 @@ static  char *  replies[] = {
 /* 001  RPL_WELCOME, */ ":%s 001 %s :Welcome to The %s Internet Relay Chat Network %s",
 /* 002  RPL_YOURHOST,*/ ":%s 002 %s :Your host is %s, running version %s",
 /* 003  RPL_CREATED, */ ":%s 003 %s :This server was created %s",
-/* 004  RPL_MYINFO, */  ":%s 004 %s %s %s aABhHiNoOprRSTvwyz aAbBcCdfikKlmnoOpqrRsStv",
+/* 004  RPL_MYINFO, */  ":%s 004 %s %s %s aABhHiNoOprRSTvwyxXz aAbBcCdfikKlmnoOpqrRsStv",
 /* 005  RPL_ISUPPORT, */":%s 005 %s %s :is supported on this server", 
 /* 006 	RPL_MAP, */     ":%s 006 %s :%s%-*s (Users:%5d)  (%2d%%) [%s]",
 /* 007  RPL_MAPEND */   ":%s 007 %s :End of /MAP",

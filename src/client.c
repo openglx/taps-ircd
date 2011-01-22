@@ -1445,6 +1445,22 @@ const char* comment        /* Reason for the exit */
                                sptr->name, sptr->username, sptr->host,
                                comment,
                                sptr->realhost);
+
+/*
+Could use something like this to send messages of connecting/exiting clients at each vlink,
+for different (global) channels. Problem is: sendto_channel requires a valid channel pointer,
+and I don't see myself doing it right now.
+
+It isn't THAT dificult, just have to make sure no user could stay lying there if services
+are down, for example. Anyway, needs a little more think before code.
+
+          if (sptr->user->vlink)
+    	  sendto_channel_butserv(lch_connects, &me,
+  			  ":%s PRIVMSG #Connects_%s :Client << %s (%s@%s) [%s] {vlink}",
+					  me.name, sptr->user->vlink->name, 
+	    			  sptr->name, sptr->username, sptr->host,
+                      comment);
+*/
     	  sendto_channel_butserv(lch_connects, &me,
   			  ":%s PRIVMSG &Connects :Client << %s (%s@%s) [%s] [%s]",
 					  me.name,

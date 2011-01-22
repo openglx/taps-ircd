@@ -337,7 +337,7 @@ int     m_whois(struct Client *cptr,
           if (IsHelper(acptr))
         	sendto_one(sptr, form_str(RPL_WHOISHELPOP),
                            mename, parv[0], name);
-					   
+
           if(IsOper(sptr) && WhoisExtension)
 	  {
 	    sendto_one(sptr, form_str(RPL_WHOISMODE),
@@ -349,6 +349,17 @@ int     m_whois(struct Client *cptr,
                        parv[0], name, user->away);
 	if(!IsHideOper(acptr) || IsOper(sptr))
 	  {	
+	    /* vcop patch */
+	    if (IsVLinkOper(acptr) && acptr->user->vlink) {
+		if (AreUsersAtSameVLink(sptr->user, acptr->user))
+			sendto_one(sptr, form_str(RPL_WHOISOPERATOR),
+			mename, parv[0], name, rpl_oper);
+		if (IsOper(sptr))
+			sendto_one(sptr, ":%s NOTICE %s :- %s is a Virtual Oper for"
+				" vlink %s",
+				mename, parv[0], name, acptr->user->vlink->name);
+	    }
+
 	    if (IsNetAdmin(acptr))
               sendto_one(sptr, form_str(RPL_WHOISOPERATOR),   
                       mename, parv[0], name, rpl_nadmin);

@@ -235,3 +235,27 @@ void dump_vlinks(char* dest, struct Client *acptr)
         vl=vl->next;
       }
   }
+
+/**
+ * \brief	Check if two users are at a same vlink
+ * \param	user1	User struct ptr
+ * \param	user2	User struct ptr
+ * \return	1 if they are, 0 otherwise
+ */
+inline int check_if_at_same_vlink(struct User* user1, struct User* user2)
+{
+	if (!user1 || !user2)
+		return 0;
+
+	if (!user1->vlink || !user2->vlink)
+		return 0;
+
+	if (!user1->vlink->name || !user2->vlink->name)
+		return 0;
+
+	if (!strcmp(user1->vlink->name, user2->vlink->name))
+		return 1;
+
+	return 0;
+}
+
