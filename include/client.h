@@ -383,6 +383,8 @@ struct Client
 #define UMODE_VLINK_OPER	0x10000000 /* vlink oper, also known as vcop */
 #define UMODE_VLINK_ADMIN	0x20000000 /* vlink admin, also known as vadmin */
 
+#define UMODE_VIP		0x40000000 /* umode for VIP User */
+
 /* end of umodes */
 
 
@@ -442,12 +444,12 @@ struct Client
 					  UMODE_STEALTH | UMODE_SSL | UMODE_FLOODEX | UMODE_DEAF )
 #define INTERNAL_UMODES (UMODE_BOT | UMODE_IDENTIFIED | UMODE_STEALTH | \
 			UMODE_SADMIN | UMODE_SSL | UMODE_FLOODEX | UMODE_VLINK_OPER | \
-			UMODE_VLINK_ADMIN )
+			UMODE_VLINK_ADMIN | UMODE_VIP)
 #define ALL_UMODES   (USER_UMODES | UMODE_LOCOP | UMODE_SPY | \
 			UMODE_OPER | UMODE_LOCOP | UMODE_SADMIN | \
 			 UMODE_ZOMBIE | UMODE_HELPER | UMODE_HIDEOPER | \
 			 UMODE_ADMIN | UMODE_TECHADMIN | UMODE_NETADMIN | \
-			UMODE_VLINK_OPER | UMODE_VLINK_ADMIN )
+			UMODE_VLINK_OPER | UMODE_VLINK_ADMIN | UMODE_VIP)
 
 #ifndef OPER_UMODES
 #define OPER_UMODES  (UMODE_OPER | UMODE_WALLOP | UMODE_SPY)
@@ -582,6 +584,11 @@ struct Client
 #define SetVLinkAdmin(x)	((x)->umodes |= UMODE_VLINK_ADMIN)
 #define ClearVLinkAdmin(x)	((x)->umodes &= ~UMODE_VLINK_ADMIN)
 
+/* VIP USER */
+
+#define IsVip(x)		((x)->umodes & UMODE_VIP)
+#define SetVip(x)		((x)->umodes |= UMODE_VIP)
+#define ClearVip(x)		((x)->umodes &= ~UMODE_VIP)
 
 /* useful macro */
 #define AreUsersAtSameVLink(a,b)	(check_if_at_same_vlink(a, b))

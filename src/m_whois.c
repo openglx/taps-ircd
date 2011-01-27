@@ -127,7 +127,9 @@ int     m_whois(struct Client *cptr,
   static char rpl_admin[] = "an IRC Operator - Server Administrator";   
   static char rpl_tadmin[] = "an IRC Operator - Technical Administrator";
   static char rpl_nadmin[] = "an IRC Operator - Network Administrator"; 
-  
+  /* for vip user */
+  static char rpl_vip[] = "a VIP User";
+
   Link  *lp;
   anUser        *user;
   struct Client *acptr, *a2cptr;
@@ -379,15 +381,30 @@ int     m_whois(struct Client *cptr,
               sendto_one(sptr, form_str(RPL_WHOISOPERATOR),
             	mename, parv[0], name, rpl_locop);
 	  }
-#ifdef WHOIS_NOTICE
-          if ((IsOper(acptr)) && ((acptr)->umodes & UMODE_SPY) &&
-              (MyConnect(sptr)) && (IsPerson(sptr)) && (acptr != sptr) && !is_silenced(sptr, acptr))
-            sendto_one(acptr,
-                       ":%s NOTICE %s :*** Notice -- %s (%s@%s) is doing a /whois on you.",
-                       me.name, acptr->name, parv[0], sptr->username,
-                       sptr->realhost);
-#endif /* #ifdef WHOIS_NOTICE */
+          if (IsVip (acptr))
+             sendto_one (sptr, form_str(RPL_WHOISOPERATOR),
+                         mename, parv[0], name, rpl_vip);
 
+#ifdef WHOIS_NOTICE
+          if (((acptr)->umodes & UMODE_SPY) && (MyConnect(sptr)) && 
+              (IsPerson(sptr)) && (acptr != sptr) && !is_silenced(sptr, acptr))
+          {
+              if (IsOper(acptr))
+                   sendto_one(acptr,
+                              ":%s NOTICE %s :*** Notice -- %s (%s@%s) is doing a /whois on you.",
+                              me.name, acptr->name, parv[0], sptr->username,
+                              sptr->realhost);
+
+          /* vip patch */
+              else if (IsVip(acptr) || IsLocOp (acptr) || IsVLinkOper(acptr) || 
+                       IsVLinkAdmin(acptr))
+                   sendto_one (acptr,
+                               ":%s NOTICE %s :*** Notice -- %s (%s@%s) is doing a /whois on you.",
+                                me.name, acptr->name, sptr->name, sptr->username,
+                                sptr->host);
+           }
+
+#endif /* #ifdef WHOIS_NOTICE */
 
           if ((acptr->user
 #ifdef SERVERHIDE

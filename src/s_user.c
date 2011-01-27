@@ -112,6 +112,7 @@ FLAG_ITEM user_modes[] =
   {UMODE_STEALTH,'S'},
   {UMODE_TECHADMIN, 'T'},
   {UMODE_NODCC, 'v'},
+  {UMODE_VIP, 'V' },
   {UMODE_WALLOP, 'w'},
   {UMODE_SPY,'y'},
   {UMODE_VLINK_OPER, 'x'},
@@ -150,7 +151,7 @@ int user_modes_from_c_to_bitmask[] =
   UMODE_STEALTH,/* S */
   UMODE_TECHADMIN,/* T */
   0,            /* U */
-  0, /* V */ 
+  UMODE_VIP, 	/* V */ 
   0,            /* W */
   UMODE_VLINK_ADMIN, /* X */
   0,            /* Y */
@@ -2814,6 +2815,7 @@ int user_mode(aClient *cptr, aClient *sptr, int parc, char *parv[])
 		case 'a' :		/* */
 		case 'x' :	/* vlink oper */
 		case 'X' :	/* vlink admin */
+		case 'V' :      /* vip user */
 		  if (!IsServer(cptr) && (what == MODE_ADD))
 			break;
 

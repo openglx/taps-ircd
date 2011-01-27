@@ -3409,20 +3409,33 @@ int     m_join(struct Client *cptr,
                        sptr->name);
             }
 #endif
-		  
-          if (((sptr->user->joined >= MaxChansPerUser && (!MaxChansPerRegUser || !IsIdentified(sptr))
-            || (MaxChansPerRegUser && IsIdentified(sptr) && sptr->user->joined >= MaxChansPerRegUser))
-          ) && !IsService(sptr) &&
-             (!IsAnOper(sptr) || (sptr->user->joined >= MaxChansPerUser*10)))
+		  /* vip patch */
+           do
             {
-              sendto_one(sptr, form_str(ERR_TOOMANYCHANNELS),
-                         me.name, parv[0], name);
+                if (sptr->user->joined < MaxChansPerUser)
+                    continue;
+                if (IsService (sptr) || IsAnOper(sptr))
+                    continue;
+                if (MaxChansPerRegUser)
+                {
+                    if (IsIdentified(sptr) && sptr->user->joined < MaxChansPerRegUser)
+                       continue;
+                    if (IsVip(sptr) && sptr->user->joined < 2*MaxChansPerRegUser)
+                       continue;
+                }
+                else
+                {
+                    if (IsVip(sptr) && sptr->user->joined < 2*MaxChansPerUser)
+                       continue;
+                }
+                sendto_one(sptr, form_str(ERR_TOOMANYCHANNELS),
+                           me.name, parv[0], name);
 #ifdef ANTI_SPAMBOT
-              if(successful_join_count)
-                sptr->last_join_time = CurrentTime;
+                if(successful_join_count)
+                   sptr->last_join_time = CurrentTime;
 #endif
-              return 0;
-            }
+                return 0;
+            } while (0);
 
 
 #ifdef ANTI_SPAMBOT       /* Dianora */
