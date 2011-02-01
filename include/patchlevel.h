@@ -17,6 +17,6 @@
  */
 
 #ifndef PATCHLEVEL
-#define PATCHLEVEL    "Hybrid6/TAPS6.21.0-RC1"
+#define PATCHLEVEL    "Hybrid6/TAPS6.21.0"
 #define SHORT_VERSION "Hybrid6/TAPS6"
 #endif
