@@ -352,14 +352,28 @@ int     m_whois(struct Client *cptr,
 	if(!IsHideOper(acptr) || IsOper(sptr))
 	  {	
 	    /* vcop patch */
-	    if (IsVLinkOper(acptr) && acptr->user->vlink) {
-		if (AreUsersAtSameVLink(sptr->user, acptr->user))
-			sendto_one(sptr, form_str(RPL_WHOISOPERATOR),
-			mename, parv[0], name, rpl_oper);
-		if (IsOper(sptr))
+	    if (acptr->user->vlink) {
+
+		if (AreUsersAtSameVLink(sptr->user, acptr->user)) {
+			if  (IsVLinkOper(acptr))
+				sendto_one(sptr, form_str(RPL_WHOISOPERATOR),
+				mename, parv[0], name, rpl_oper);
+			if  (IsVLinkAdmin(acptr))
+				sendto_one(sptr, form_str(RPL_WHOISOPERATOR),
+				mename, parv[0], name, rpl_admin);
+		}
+		
+		/* if source is oper, tell them this is a vadmin */
+		if (IsOper(sptr)) {
+			if (IsVLinkOper(acptr))
 			sendto_one(sptr, ":%s NOTICE %s :- %s is a Virtual Oper for"
 				" vlink %s",
 				mename, parv[0], name, acptr->user->vlink->name);
+			if (IsVLinkAdmin(acptr))
+			sendto_one(sptr, ":%s NOTICE %s :- %s is a Virtual Admin for"
+				" vlink %s",
+				mename, parv[0], name, acptr->user->vlink->name);
+		}
 	    }
 
 	    if (IsNetAdmin(acptr))
@@ -399,9 +413,9 @@ int     m_whois(struct Client *cptr,
               else if (IsVip(acptr) || IsLocOp (acptr) || IsVLinkOper(acptr) || 
                        IsVLinkAdmin(acptr))
                    sendto_one (acptr,
-                               ":%s NOTICE %s :*** Notice -- %s (%s@%s) is doing a /whois on you.",
-                                me.name, acptr->name, sptr->name, sptr->username,
-                                sptr->host);
+                              ":%s NOTICE %s :*** Notice -- %s (%s@%s) is doing a /whois on you.",
+                               me.name, acptr->name, sptr->name, sptr->username,
+                               sptr->host);
            }
 
 #endif /* #ifdef WHOIS_NOTICE */
