@@ -127,14 +127,23 @@ int m_kill(struct Client *cptr, struct Client *sptr, int parc, char *parv[])
     }
 
   if (MyClient(sptr)) {
-    if (IsAnOper(sptr) && !IsSetOperK(sptr)) {
-      sendto_one(sptr,":%s NOTICE %s :You have no K flag",me.name,parv[0]);
-      return 0;
-    }
-    if (!(IsVLinkOper(cptr) || IsVLinkAdmin(cptr))) {
-      sendto_one(sptr,":%s NOTICE %s :You have no K flag",me.name,parv[0]);
-      return 0;
-    }
+  /* crappy virtual link code broke this verification. See issue 62 -- openglx */
+	do {
+
+    	if (IsAnOper(sptr)) {
+			if (!IsSetOperK(sptr)) {
+      			sendto_one(sptr,":%s NOTICE %s :You have no K flag",me.name,parv[0]);
+			      return 0;
+			}
+			break;
+		}
+
+		/* will check if is vlink local user after */
+	    if (!(IsVLinkOper(cptr) || IsVLinkAdmin(cptr))) {
+      		sendto_one(sptr,":%s NOTICE %s :You have no K flag",me.name,parv[0]);
+      		return 0;
+		}
+	} while (0);
   }
 
   if (IsAnOper(cptr))
